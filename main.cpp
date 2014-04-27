@@ -50,7 +50,6 @@ private:
     string extension;
 };
 
-
 void usage() {
     cout << "Usage: cloc <directory>.\n";
     exit(EXIT_FAILURE);
@@ -63,45 +62,40 @@ int main(int argc, char** argv) {
     }
 
     file::path root_path(argv[1]);
-    vector<FileInfo> fileInfos;
+    std::map<string, LanguageStats> stats;
 
     int fileCounter = 0;
     int sourceFileCounter = 0;
 
+    for (auto& ext: extensions) {
+        stats[ext] = LanguageStats(ext);
+    }
+
     for (file::recursive_directory_iterator iter(root_path), end; iter != end; ++iter) {
         file::path path = *iter;
-        auto ext = path.extension();
+        auto ext = path.extension().generic_string();
         fileCounter++;
         // file extension is recognized
         if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end()) {
+            // TODO improve this design
             FileParser parser(path);
-            fileInfos.push_back(parser.parseFile());
+            stats[ext].addFileInfo(parser.parseFile());
             sourceFileCounter++;
         }
     }
-
-    std::map<string, LanguageStats> stats;
 
     int sumFiles = 0;
     int sumBlankLines = 0;
     int sumCommentLines = 0;
     int sumSourceLines = 0;
 
-    for (auto& ext: extensions) {
-        stats[ext] = LanguageStats(ext);
-    }
-
-    for (auto& info: fileInfos) {
-        auto& v = stats.at(info.getExtension());
-        v.addFileInfo(info);
-    }
     cout << "Overall number of files: " << fileCounter << endl;
     cout << "Overall number of source files: " << sourceFileCounter << endl << endl;
-
     cout << "Language\tFiles\tBlank\tComment\tCode" << endl;
     cout << "-----------------------------------------------------" << endl;
+
     for (auto& pair: stats) {
-        auto info = pair.second;
+        auto& info = pair.second;
         if (info.getNumFiles() > 0) {
             cout << info.getExtension() << "\t" << info.getNumFiles() << "\t"
                  << info.getBlankLines() << "\t" << info.getCommentLines() << "\t"

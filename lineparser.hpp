@@ -2,6 +2,8 @@
 #define LINEPARSER_HPP
 #include "common.hpp"
 #include <boost/algorithm/string/predicate.hpp>
+#include <functional>
+
 enum LineType {
     SOURCE_LINE,
     BLANK_LINE,

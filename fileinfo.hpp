@@ -10,8 +10,8 @@ public:
         blankLines(blank),
         sourceLines(source),
         commentLines(comment) { }
-    FileInfo():
-        path(file::path()),
+    FileInfo(const file::path& p = file::path()):
+        path(p),
         blankLines(0),
         sourceLines(0),
         commentLines(0) { }
@@ -32,6 +32,10 @@ public:
             << "Blank lines: " << blankLines << endl;
         return str.str();
     }
+
+    void incBlankLines() { blankLines++; }
+    void incSourceLines() { sourceLines++; }
+    void incCommentLines() { commentLines++; }
 
 private:
     file::path path;

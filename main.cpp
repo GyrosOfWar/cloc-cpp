@@ -4,6 +4,7 @@
 #include <initializer_list>
 #include <map>
 #include <chrono>
+#include <functional>
 
 #include "fileinfo.hpp"
 #include "fileparser.hpp"
@@ -56,7 +57,6 @@ int main(int argc, char** argv) {
 
     file::path root_path(argv[1]);
     std::map<string, LanguageStats> stats;
-
     int fileCounter = 0;
     int sourceFileCounter = 0;
 
@@ -79,10 +79,10 @@ int main(int argc, char** argv) {
     }
 
     auto t2 = high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
     auto seconds = duration / 1e6;
-    cout << "T = " << seconds << " s, "
-         << sourceFileCounter / seconds << " files/sec." << endl;
+    cout << "Elapsed time: " << seconds << " seconds, "
+         << sourceFileCounter / seconds << " files processed per second." << endl;
 
     int sumFiles = 0;
     int sumBlankLines = 0;

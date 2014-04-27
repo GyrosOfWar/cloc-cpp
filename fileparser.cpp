@@ -1,30 +1,15 @@
 #include "fileparser.hpp"
 
-FileParser::FileParser(const file::path &p): path(p) {
-    auto extension = p.extension();
-    if (extension == ".cpp" || extension == ".hpp" || extension == ".h" || extension == ".c"
-            || extension == ".java" || extension == ".php" || extension == ".scala"
-            || extension == ".cs") {
-        lineParser = std::unique_ptr<LineParser>(new CLineParser());
-    }
-
-    if (extension == ".py") {
-        lineParser = std::unique_ptr<LineParser>(new PythonLineParser());
-    }
-
-    if (extension == ".clj" || extension == ".lisp") {
-        lineParser = std::unique_ptr<LineParser>(new LispLineParser());
-    }
-}
-
-FileInfo FileParser::parseFile() {
+FileInfo FileParser::parseFile(const file::path &p) {
     int sourceLines = 0;
     int blankLines = 0;
     int commentLines = 0;
 
-    std::ifstream file(this->path.generic_string());
-    string line;
+    auto ext = p.extension().generic_string();
+    auto lineParser = LineParserFactory::makeLineParser(ext);
 
+    std::ifstream file(p.generic_string());
+    string line;
     if (file) {
         while (std::getline(file, line)) {
             auto result = lineParser->parse(line);
@@ -42,5 +27,8 @@ FileInfo FileParser::parseFile() {
         }
     }
 
-    return FileInfo(path, blankLines, sourceLines, commentLines);
+    return FileInfo(p, blankLines, sourceLines, commentLines);
 }
+
+vector<string> FileParser::supportedExtensions =
+    { ".cpp", ".hpp", ".c", ".h", ".py", ".scala", ".java", ".scala", ".clj", ".lisp", ".cs" };

@@ -3,22 +3,15 @@
 #include <cstdlib>
 #include <initializer_list>
 #include <map>
+#include <chrono>
 
 #include "fileinfo.hpp"
 #include "fileparser.hpp"
 #include "lineparser.hpp"
+using namespace std::chrono;
 
 class LanguageStats {
 public:
-    LanguageStats(const vector<FileInfo>& v): numFiles(v.size()) {
-        extension = v[0].getExtension();
-        for (auto& info: v) {
-            blankLines += info.getBlankLines();
-            commentLines += info.getCommentLines();
-            sourceLines += info.getSourceLines();
-        }
-    }
-
     LanguageStats(string name = ""):
         numFiles(0),
         blankLines(0),
@@ -56,7 +49,7 @@ void usage() {
 }
 
 int main(int argc, char** argv) {
-    vector<string> extensions { ".cpp", ".hpp", ".c", ".h", ".py", ".scala", ".java", ".scala", ".clj", ".lisp", ".cs" };
+    auto& extensions = FileParser::supportedExtensions;
     if (argc <= 1 ||  argc > 2) {
         usage();
     }
@@ -71,18 +64,25 @@ int main(int argc, char** argv) {
         stats[ext] = LanguageStats(ext);
     }
 
+    auto t1 = high_resolution_clock::now();
+
     for (file::recursive_directory_iterator iter(root_path), end; iter != end; ++iter) {
         file::path path = *iter;
         auto ext = path.extension().generic_string();
         fileCounter++;
         // file extension is recognized
         if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end()) {
-            // TODO improve this design
-            FileParser parser(path);
-            stats[ext].addFileInfo(parser.parseFile());
+            auto info = FileParser::parseFile(path);
+            stats[ext].addFileInfo(info);
             sourceFileCounter++;
         }
     }
+
+    auto t2 = high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+    auto seconds = duration / 1e6;
+    cout << "T = " << seconds << " s, "
+         << sourceFileCounter / seconds << " files/sec." << endl;
 
     int sumFiles = 0;
     int sumBlankLines = 0;
@@ -111,7 +111,12 @@ int main(int argc, char** argv) {
     cout << "-----------------------------------------------------" << endl;
     cout << "Sum:\t" << sumFiles << "\t" << sumBlankLines << "\t"
          << sumCommentLines << "\t" << sumSourceLines << endl;
-
+    auto overallSum = sumBlankLines + sumCommentLines + sumSourceLines;
+    if (overallSum > (int) 1e6) {
+        cout << "Overall lines of code: " << overallSum / 1e6 << " MLOC" << endl;
+    } else {
+        cout << "Overall lines of code: " << overallSum << " LOC" << endl;
+    }
 
     return 0;
 }

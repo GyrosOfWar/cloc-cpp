@@ -9,11 +9,8 @@
 
 class FileParser {
 public:
-    FileParser(const file::path& p);
-    FileInfo parseFile();
-private:
-    file::path path;
-    std::unique_ptr<LineParser> lineParser;
+    static FileInfo parseFile(const file::path& p);
+    static vector<string> supportedExtensions;
 };
 
 #endif // FILEPARSER_H

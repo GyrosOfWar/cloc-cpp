@@ -48,8 +48,8 @@ int main(int argc, char** argv) {
     }
 
     auto t2 = high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
-    auto seconds = duration / 1e6;
+    auto duration = duration_cast<nanoseconds>(t2 - t1).count();
+    auto seconds = duration / 1e9;
     cout << "Elapsed time: " << seconds << " seconds, "
          << sourceFileCounter / seconds << " files processed per second." << endl;
 

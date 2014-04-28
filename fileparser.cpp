@@ -48,7 +48,7 @@ vector<string> FileParserFactory::getExtensions() {
 FileInfo SingleLineCommentParser::parseFile(const file::path &path) {
     std::ifstream file(path.generic_string());
     string line;
-    FileInfo info;
+    FileInfo info(path);
 
     while (std::getline(file, line)) {
         boost::trim(line);
@@ -57,7 +57,7 @@ FileInfo SingleLineCommentParser::parseFile(const file::path &path) {
             info.incCommentLines();
         }
 
-        if (line == "") {
+        else if (line == "") {
             info.incBlankLines();
         }
 
@@ -71,7 +71,7 @@ FileInfo SingleLineCommentParser::parseFile(const file::path &path) {
 FileInfo MultiLineCommentParser::parseFile(const file::path &path) {
     std::ifstream file(path.generic_string());
     string line;
-    FileInfo info;
+    FileInfo info(path);
     bool multiLine = false;
 
     while (std::getline(file, line)) {
@@ -88,17 +88,17 @@ FileInfo MultiLineCommentParser::parseFile(const file::path &path) {
             }
         }
 
-        if (singleLineToken != "" && boost::starts_with(line, singleLineToken)) {
+        else if (singleLineToken != "" && boost::starts_with(line, singleLineToken)) {
             info.incCommentLines();
         }
 
-        if (boost::starts_with(line, multiStartToken)) {
+        else if (boost::starts_with(line, multiStartToken)) {
             info.incCommentLines();
             if (!boost::find_first(line, multiEndToken)) {
                 multiLine = true;
             }
         }
-        if (line == "") {
+        else if (line == "") {
             info.incBlankLines();
         }
 

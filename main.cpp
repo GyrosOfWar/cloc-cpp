@@ -1,14 +1,13 @@
 #include "common.hpp"
 
 #include <cstdlib>
-#include <initializer_list>
 #include <map>
 #include <chrono>
-#include <functional>
 
 #include "fileinfo.hpp"
 #include "fileparser.hpp"
 #include "languagestats.hpp"
+
 using namespace std::chrono;
 
 void usage() {

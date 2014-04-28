@@ -26,7 +26,7 @@ private:
 
 class MultiLineCommentParser: public IFileParser {
 public:
-    MultiLineCommentParser(string start, string end, string singleLine):
+    MultiLineCommentParser(string start, string end, string singleLine = ""):
         multiStartToken(start),
         multiEndToken(end),
         singleLineToken(singleLine) { }
@@ -48,7 +48,6 @@ public:
 private:
     static vector<string> cExts;
     static vector<string> lispExts;
-    static vector<string> rubyExts;
 };
 
 #endif // FILEPARSER_H

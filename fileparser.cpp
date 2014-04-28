@@ -4,8 +4,6 @@ vector<string> FileParserFactory::cExts { ".cpp", ".hpp", ".cs", ".h", ".c",
                                                    ".java", ".scala", ".php" };
 vector<string> FileParserFactory::lispExts { ".lisp", ".clj", ".scm", ".ss", ".rkt" };
 
-vector<string> FileParserFactory::rubyExts { ".rb", ".rbw" };
-
 std::unique_ptr<IFileParser> FileParserFactory::makeFileParser(const file::path& path) {
     auto ext = path.extension().generic_string();
 
@@ -16,10 +14,21 @@ std::unique_ptr<IFileParser> FileParserFactory::makeFileParser(const file::path&
     if (std::find(lispExts.begin(), lispExts.end(), ext) != lispExts.end()) {
         return std::unique_ptr<IFileParser>(new SingleLineCommentParser(";"));
     }
-    if (std::find(rubyExts.begin(), rubyExts.end(), ext) != rubyExts.end()) {
+    if (ext == ".rb") {
         return std::unique_ptr<IFileParser>(new MultiLineCommentParser("=begin", "=end" , "#"));
     }
 
+    if (ext == ".py") {
+        return std::unique_ptr<IFileParser>(new SingleLineCommentParser("#"));
+    }
+
+    if (ext == ".html" || ext == ".htm") {
+        return std::unique_ptr<IFileParser>(new MultiLineCommentParser("<!--", "-->"));
+    }
+
+    if (ext == ".css") {
+        return std::unique_ptr<IFileParser>(new MultiLineCommentParser("/*", "*/"));
+    }
 
     assert(false);
 }
@@ -28,7 +37,11 @@ vector<string> FileParserFactory::getExtensions() {
     vector<string> ret;
     ret.insert(ret.end(), cExts.begin(), cExts.end());
     ret.insert(ret.end(), lispExts.begin(), lispExts.end());
-    ret.insert(ret.end(), rubyExts.begin(), rubyExts.end());
+    ret.push_back(".rb");
+    ret.push_back(".py");
+    ret.push_back(".htm");
+    ret.push_back(".html");
+    ret.push_back(".css");
     return ret;
 }
 
@@ -75,7 +88,7 @@ FileInfo MultiLineCommentParser::parseFile(const file::path &path) {
             }
         }
 
-        if (boost::starts_with(line, singleLineToken)) {
+        if (singleLineToken != "" && boost::starts_with(line, singleLineToken)) {
             info.incCommentLines();
         }
 

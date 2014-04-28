@@ -8,41 +8,8 @@
 
 #include "fileinfo.hpp"
 #include "fileparser.hpp"
-#include "lineparser.hpp"
+#include "languagestats.hpp"
 using namespace std::chrono;
-
-class LanguageStats {
-public:
-    LanguageStats(string name = ""):
-        numFiles(0),
-        blankLines(0),
-        commentLines(0),
-        sourceLines(0),
-        extension(name) { }
-
-    int getNumFiles() const { return numFiles; }
-    int getBlankLines() const { return blankLines; }
-    int getSourceLines() const { return sourceLines; }
-    int getCommentLines() const { return commentLines; }
-    string getExtension() const { return extension; }
-
-    void addFileInfo(const FileInfo& info) {
-        if (extension == "" ) {
-            extension = info.getExtension();
-        }
-        numFiles++;
-        blankLines += info.getBlankLines();
-        commentLines += info.getCommentLines();
-        sourceLines += info.getSourceLines();
-    }
-
-private:
-    int numFiles;
-    int blankLines;
-    int commentLines;
-    int sourceLines;
-    string extension;
-};
 
 void usage() {
     cout << "Usage: cloc <directory>.\n";
@@ -50,7 +17,9 @@ void usage() {
 }
 
 int main(int argc, char** argv) {
-    auto& extensions = FileParser::supportedExtensions;
+    auto extensions = FileParserFactory::getExtensions();
+    // TODO use boost::program_options to process command line args
+
     if (argc <= 1 ||  argc > 2) {
         usage();
     }
@@ -72,7 +41,8 @@ int main(int argc, char** argv) {
         fileCounter++;
         // file extension is recognized
         if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end()) {
-            auto info = FileParser::parseFile(path);
+            auto parser = FileParserFactory::makeFileParser(path);
+            auto info = parser->parseFile(path);
             stats[ext].addFileInfo(info);
             sourceFileCounter++;
         }

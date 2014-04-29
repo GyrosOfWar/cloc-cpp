@@ -7,7 +7,10 @@
 #include <memory>
 #include <boost/algorithm/string.hpp>
 #include <cassert>
+#include <map>
 
+using std::unique_ptr;
+using std::shared_ptr; using std::make_shared;
 
 class IFileParser {
 public:
@@ -41,13 +44,17 @@ private:
 
 class FileParserFactory {
 public:
-    static std::unique_ptr<IFileParser> makeFileParser(const file::path& path);
+    static shared_ptr<IFileParser> makeFileParser(const file::path& path);
 
     static vector<string> getExtensions();
 
 private:
     static vector<string> cExts;
     static vector<string> lispExts;
+    static std::map<string, shared_ptr<IFileParser> > parsers;
+
+    static void init();
+    static bool isInitialized;
 };
 
 #endif // FILEPARSER_H

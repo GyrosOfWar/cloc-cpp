@@ -4,33 +4,48 @@ vector<string> FileParserFactory::cExts { ".cpp", ".hpp", ".cs", ".h", ".c",
                                                    ".java", ".scala", ".php" };
 vector<string> FileParserFactory::lispExts { ".lisp", ".clj", ".scm", ".ss", ".rkt" };
 
-std::unique_ptr<IFileParser> FileParserFactory::makeFileParser(const file::path& path) {
+bool FileParserFactory::isInitialized = false;
+
+std::map<string, shared_ptr<IFileParser> > FileParserFactory::parsers = std::map<string, shared_ptr<IFileParser> >();
+
+void FileParserFactory::init() {
+    // TODO maybe use a big std::map literal for all of this? Might be more readable
+    auto cParser = std::make_shared<MultiLineCommentParser>("/*", "*/", "//");
+
+    for (auto& ext: cExts) {
+        parsers[ext] = cParser;
+    }
+
+    auto lispParser = std::make_shared<SingleLineCommentParser>(";");
+    for (auto& ext: lispExts) {
+        parsers[ext] = lispParser;
+    }
+
+    auto htmlParser = make_shared<MultiLineCommentParser>("<!--", "-->");
+
+    parsers[".html"] = htmlParser;
+    parsers[".htm"] = htmlParser;
+
+    auto rubyParser = make_shared<MultiLineCommentParser>("=begin", "=end", "#");
+    parsers[".rb"] = rubyParser;
+
+    auto pythonParser = make_shared<SingleLineCommentParser>("#");
+    parsers[".py"] = pythonParser;
+    parsers[".coffee"] = pythonParser;
+
+    auto cssParser = make_shared<MultiLineCommentParser>("/*", "*/");
+    parsers[".css"] = cssParser;
+}
+
+shared_ptr<IFileParser> FileParserFactory::makeFileParser(const file::path& path) {
+    if(!isInitialized) {
+        init();
+        isInitialized = true;
+    }
+
     auto ext = path.extension().generic_string();
 
-    if (std::find(cExts.begin(), cExts.end(), ext) != cExts.end()) {
-        return std::unique_ptr<IFileParser>(new MultiLineCommentParser("/*", "*/", "//"));
-    }
-
-    if (std::find(lispExts.begin(), lispExts.end(), ext) != lispExts.end()) {
-        return std::unique_ptr<IFileParser>(new SingleLineCommentParser(";"));
-    }
-    if (ext == ".rb") {
-        return std::unique_ptr<IFileParser>(new MultiLineCommentParser("=begin", "=end" , "#"));
-    }
-
-    if (ext == ".py") {
-        return std::unique_ptr<IFileParser>(new SingleLineCommentParser("#"));
-    }
-
-    if (ext == ".html" || ext == ".htm") {
-        return std::unique_ptr<IFileParser>(new MultiLineCommentParser("<!--", "-->"));
-    }
-
-    if (ext == ".css") {
-        return std::unique_ptr<IFileParser>(new MultiLineCommentParser("/*", "*/"));
-    }
-
-    assert(false);
+    return parsers[ext];
 }
 
 vector<string> FileParserFactory::getExtensions() {

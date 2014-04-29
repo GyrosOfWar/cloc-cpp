@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
         if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end()) {
             auto parser = FileParserFactory::makeFileParser(path);
             auto info = parser->parseFile(path);
-            stats[ext].addFileInfo(info);
+            stats[ext].addFileInfo(info, ext);
             sourceFileCounter++;
         }
     }

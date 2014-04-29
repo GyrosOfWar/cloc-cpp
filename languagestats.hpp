@@ -17,9 +17,9 @@ public:
     int getCommentLines() const { return commentLines; }
     string getExtension() const { return extension; }
 
-    void addFileInfo(const FileInfo& info) {
-        if (extension == "" ) {
-            extension = info.getExtension();
+    void addFileInfo(const FileInfo& info, const string& extension) {
+        if (extension == "") {
+            this->extension = extension;
         }
         numFiles++;
         blankLines += info.getBlankLines();

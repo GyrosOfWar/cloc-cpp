@@ -63,7 +63,7 @@ vector<string> FileParserFactory::getExtensions() {
 FileInfo SingleLineCommentParser::parseFile(const file::path &path) {
     std::ifstream file(path.generic_string());
     string line;
-    FileInfo info(path);
+    FileInfo info;
 
     while (std::getline(file, line)) {
         boost::trim(line);
@@ -86,7 +86,7 @@ FileInfo SingleLineCommentParser::parseFile(const file::path &path) {
 FileInfo MultiLineCommentParser::parseFile(const file::path &path) {
     std::ifstream file(path.generic_string());
     string line;
-    FileInfo info(path);
+    FileInfo info;
     bool multiLine = false;
 
     while (std::getline(file, line)) {

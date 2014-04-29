@@ -9,7 +9,6 @@
 #include <cassert>
 #include <map>
 
-using std::unique_ptr;
 using std::shared_ptr; using std::make_shared;
 
 class IFileParser {

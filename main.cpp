@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
         // file extension is recognized
         if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end()) {
             auto parser = FileParserFactory::makeFileParser(path);
-            auto info = parser->parseFile(path);
+            auto info = parser.parse(path);
             stats[ext].addFileInfo(info, ext);
             sourceFileCounter++;
         }

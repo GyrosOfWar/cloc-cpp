@@ -43,46 +43,7 @@ public:
         isMultiLine = true;
     }
 
-    FileInfo parse(const file::path& path) {
-        std::ifstream file(path.generic_string());
-        string line;
-        FileInfo info;
-        bool multiLine = false;
-
-
-        if(file) {
-            while(std::getline(file, line)) {
-                boost::trim_left(line);
-
-                LineType result;
-                if (isSingleLine) {
-                    result = parseSingleLine(line);
-                }
-                if (isMultiLine) {
-                    result = parseMultiLine(line, multiLine);
-                }
-
-                switch(result) {
-                case SINGLE_LINE_COMMENT:
-                case MULTI_LINE_COMMENT:
-                case MULTI_LINE_COMMENT_END:
-                case MULTI_LINE_COMMENT_START:
-                    info.incSourceLines();
-                    break;
-                case SOURCE_LINE:
-                    info.incSourceLines();
-                    break;
-                case BLANK_LINE:
-                    info.incBlankLines();
-                    break;
-                default:
-                    assert(0);
-                }
-            }
-        }
-
-        return info;
-    }
+    FileInfo parse(const file::path& path);
 
 private:
     string singleToken;
@@ -100,41 +61,9 @@ private:
         MULTI_LINE_COMMENT_END
     };
 
-    LineType parseSingleLine(const string& line) {
-        if (boost::starts_with(line, singleToken)) {
-            return SINGLE_LINE_COMMENT;
-        }
+    LineType parseSingleLine(const string& line);
 
-        if (line == "") {
-            return BLANK_LINE;
-        }
-
-        return SOURCE_LINE;
-    }
-
-    LineType parseMultiLine(const string& line, bool& currentlyMultiLine) {
-        if (currentlyMultiLine) {
-            if (boost::find_first(line, multiEndToken)) {
-                currentlyMultiLine = false;
-                return MULTI_LINE_COMMENT_END;
-            }
-            else {
-                return MULTI_LINE_COMMENT;
-            }
-        }
-        else if (boost::starts_with(line, multiStartToken)) {
-            if (!boost::find_first(line, multiEndToken)) {
-                currentlyMultiLine = true;
-            }
-            return MULTI_LINE_COMMENT_START;
-        }
-        else if (line == "") {
-            return BLANK_LINE;
-        }
-
-        return SOURCE_LINE;
-    }
-
+    LineType parseMultiLine(const string& line, bool& currentlyMultiLine);
 };
 
 class FileParserFactory {

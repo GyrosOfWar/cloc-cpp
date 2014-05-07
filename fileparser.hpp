@@ -52,7 +52,7 @@ public:
 
         if(file) {
             while(std::getline(file, line)) {
-                boost::trim(line);
+                boost::trim_left(line);
 
                 LineType result;
                 if (isSingleLine) {

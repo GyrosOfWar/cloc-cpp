@@ -9,6 +9,16 @@
 #include <cassert>
 #include <map>
 
+enum LineType {
+    SINGLE_LINE_COMMENT,
+    SOURCE_LINE,
+    BLANK_LINE,
+    MULTI_LINE_COMMENT_START,
+    MULTI_LINE_COMMENT,
+    MULTI_LINE_COMMENT_END
+};
+
+
 class FileParser {
 public:
     FileParser():
@@ -16,32 +26,28 @@ public:
         multiStartToken(""),
         multiEndToken(""),
         isSingleLine(false),
-        isMultiLine(false)
-    { }
+        isMultiLine(false) { }
 
     FileParser(const string& singleToken):
         singleToken(singleToken),
         multiStartToken(""),
-        multiEndToken("") {
-        isSingleLine = true;
-        isMultiLine = false;
-    }
+        multiEndToken(""),
+        isSingleLine(true),
+        isMultiLine(false) { }
 
     FileParser(const string& multiStartToken, const string& multiEndToken):
         multiStartToken(multiStartToken),
         multiEndToken(multiEndToken),
-        singleToken("") {
-        isSingleLine = false;
-        isMultiLine = true;
-    }
+        singleToken(""),
+        isSingleLine(false),
+        isMultiLine(true) { }
 
     FileParser(const string& multiStartToken, const string& multiEndToken, const string& singleToken):
         singleToken(singleToken),
         multiStartToken(multiStartToken),
-        multiEndToken(multiEndToken) {
-        isSingleLine = true;
-        isMultiLine = true;
-    }
+        multiEndToken(multiEndToken),
+        isSingleLine(true),
+        isMultiLine(true) { }
 
     FileInfo parse(const file::path& path);
 
@@ -51,16 +57,6 @@ private:
     string multiEndToken;
     bool isSingleLine;
     bool isMultiLine;
-
-    enum LineType {
-        SINGLE_LINE_COMMENT,
-        SOURCE_LINE,
-        BLANK_LINE,
-        MULTI_LINE_COMMENT_START,
-        MULTI_LINE_COMMENT,
-        MULTI_LINE_COMMENT_END
-    };
-
     LineType parseSingleLine(const string& line);
 
     LineType parseMultiLine(const string& line, bool& currentlyMultiLine);
